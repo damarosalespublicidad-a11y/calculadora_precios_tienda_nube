@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calculadora de precios Tiendanube · Dama Rosales Digital</title>
+<meta name="description" content="Calculá a cuánto publicar, cuánto te queda en mano y qué descuento podés dar por transferencia en Tiendanube.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Montserrat:wght@700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  /* Paleta de los mockups en design/ (misma que src/app/globals.css). */
+  :root {
+    --wine: #801a24;
+    --wine-dark: #64141c;
+    --wine-ink: #5a121a;
+    --cream: #fbf9f5;
+    --sand: #f3ede6;
+    --line: #e8e2d9;
+    --ink: #3a2b2d;
+    --muted: #6b5b5d;
+    --mint: #e8f5e9;
+    --mint-line: #c8e6c9;
+    --forest: #1b5e20;
+    --sans: "Karla", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --display: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  :root { color-scheme: light; box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); background: var(--cream); }
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  h1, h2, h3 { font-family: var(--display); margin: 0; }
+  p { margin: 0; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  :focus-visible { outline: 3px solid color-mix(in srgb, var(--wine) 45%, transparent); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px; }
+
+  /* Encabezado */
+  header.top { padding: 22px 0 18px; }
+  .brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .logo { font-family: var(--display); font-weight: 800; color: var(--wine); font-size: 18px; letter-spacing: -0.01em; }
+  .badge { background: var(--sand); color: var(--wine-ink); border-radius: 999px; padding: 6px 12px; font-size: 12.5px; font-weight: 700; }
+  .title { margin-top: 20px; font-size: 26px; line-height: 1.15; font-weight: 800; color: var(--wine); letter-spacing: -0.01em; }
+  .lead { margin-top: 8px; color: var(--muted); font-size: 15px; line-height: 1.55; max-width: 720px; }
+
+  /* Tarjeta principal */
+  .card {
+    background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 16px;
+    box-shadow: 0 8px 24px rgba(58, 43, 45, 0.06);
+  }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--sand); border-radius: 18px; padding: 6px; }
+  .tab {
+    height: 48px; border: 0; border-radius: 12px; padding: 0 10px; background: transparent;
+    font-size: 13.5px; font-weight: 600; color: var(--wine-ink); transition: background .15s;
+  }
+  .tab:first-child { grid-column: span 2; font-size: 14.5px; }
+  .tab:hover { background: rgba(255, 255, 255, .6); }
+  .tab[aria-selected="true"] { background: var(--wine); color: #fff; font-weight: 700; }
+  .tab .long { display: none; }
+
+  .panel { margin-top: 20px; display: flex; flex-direction: column; gap: 20px; }
+  .inputs { display: flex; flex-direction: column; gap: 18px; min-width: 0; flex: 1; }
+  .results { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+
+  .field { display: flex; flex-direction: column; gap: 8px; flex: 1 1 0; min-width: 0; }
+  .row { display: flex; flex-direction: column; gap: 18px; }
+  .label { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+  .hint { font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+  .hint strong { color: var(--wine-ink); }
+
+  .box {
+    display: flex; align-items: center; gap: 8px; height: 54px; padding: 0 16px;
+    border: 1px solid var(--line); border-radius: 14px; background: var(--cream); transition: border-color .15s, background .15s;
+  }
+  .box:focus-within { border-color: var(--wine); background: #fff; }
+  .box input { flex: 1; min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; font-family: var(--mono); font-size: 19px; font-weight: 600; color: var(--ink); }
+  .affix { font-size: 17px; font-weight: 600; color: var(--muted); }
+  .box.sm { height: 48px; border-radius: 12px; background: #fff; padding: 0 14px; }
+  .box.sm input { font-size: 16px; }
+  .box.sm .affix { font-size: 15px; }
+
+  .plans { display: flex; gap: 10px; }
+  .plan {
+    flex: 1 1 0; min-height: 62px; text-align: left; padding: 12px 14px; border-radius: 14px;
+    border: 1px solid var(--line); background: var(--cream); transition: border-color .15s;
+  }
+  .plan:hover { border-color: rgba(128, 26, 36, .5); }
+  .plan[aria-pressed="true"] { border: 2px solid var(--wine); background: #fff; padding: 11px 13px; }
+  .plan b { display: block; font-size: 14px; color: var(--ink); }
+  .plan[aria-pressed="true"] b { color: var(--wine); }
+  .plan span { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+
+  .segmented { display: flex; gap: 6px; background: var(--sand); border-radius: 14px; padding: 5px; }
+  .seg {
+    flex: 1 1 0; height: 46px; border: 0; border-radius: 10px; background: transparent;
+    font-size: 14px; font-weight: 600; color: var(--wine-ink); transition: background .15s;
+  }
+  .seg:hover:not(:disabled) { background: rgba(255, 255, 255, .6); }
+  .seg[aria-pressed="true"] { background: #fff; color: var(--wine); font-weight: 700; box-shadow: 0 1px 3px rgba(58, 43, 45, .12); }
+  .seg:disabled { cursor: not-allowed; color: rgba(107, 91, 93, .6); }
+
+  .select { position: relative; }
+  .select select {
+    width: 100%; height: 54px; appearance: none; -webkit-appearance: none; cursor: pointer;
+    border: 1px solid var(--line); border-radius: 14px; background: var(--cream); padding: 0 40px 0 14px;
+    font-size: 14.5px; font-weight: 600; color: var(--ink); text-overflow: ellipsis; transition: border-color .15s;
+  }
+  .select select:hover { border-color: rgba(128, 26, 36, .5); }
+  .select select:focus { border-color: var(--wine); outline: 0; }
+  .select.sm select { height: 48px; border-radius: 12px; background: #fff; font-weight: 400; }
+  .select svg { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    height: 46px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line); background: #fff;
+    font-size: 14px; font-weight: 600; color: var(--ink); transition: border-color .15s;
+  }
+  .pill:hover { border-color: rgba(128, 26, 36, .5); }
+  .pill[aria-pressed="true"] { border: 2px solid var(--wine); background: var(--sand); color: var(--wine); font-weight: 700; padding: 0 15px; }
+
+  details.taxes { border: 1px solid var(--line); border-radius: 16px; background: var(--cream); }
+  details.taxes summary {
+    list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    min-height: 52px; padding: 0 16px; cursor: pointer; border-radius: 16px;
+  }
+  details.taxes summary::-webkit-details-marker { display: none; }
+  details.taxes summary svg { transition: transform .15s; flex-shrink: 0; }
+  details.taxes[open] summary svg { transform: rotate(180deg); }
+  .taxes-body { padding: 0 16px 18px; }
+  .taxes-row { display: flex; flex-direction: column; gap: 16px; }
+  .taxes-row .label { font-size: 13px; }
+
+  /* Resultados */
+  .result { background: var(--wine); color: #fff; border-radius: 20px; padding: 22px; }
+  .eyebrow { display: block; font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+  .result .eyebrow { color: rgba(255, 255, 255, .8); }
+  .big { display: block; margin-top: 8px; font-size: 42px; line-height: 1; font-weight: 600; }
+  .sub { display: block; margin-top: 8px; font-size: 14px; color: rgba(255, 255, 255, .8); }
+  .sub strong { color: #fff; }
+  .divider { height: 1px; background: rgba(255, 255, 255, .2); margin: 18px 0; }
+  .lines { display: flex; flex-direction: column; gap: 10px; font-size: 13.5px; }
+  .line { display: flex; justify-content: space-between; gap: 12px; }
+  .line > span:first-child { color: rgba(255, 255, 255, .8); }
+  .line > span:last-child { white-space: nowrap; }
+  .total { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .2); display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .total b { font-size: 13.5px; }
+  .total .num { font-size: 18px; font-weight: 600; white-space: nowrap; }
+  .total small { font-size: 13px; color: rgba(255, 255, 255, .75); }
+
+  .error { border: 1px solid var(--line); background: var(--cream); border-radius: 20px; padding: 22px; }
+  .error .eyebrow { color: var(--wine); }
+  .error p { margin-top: 8px; font-size: 15px; line-height: 1.6; }
+
+  .stats { display: flex; gap: 12px; }
+  .stat { flex: 1 1 0; border: 1px solid var(--line); background: #fff; border-radius: 18px; padding: 16px; min-width: 0; }
+  .stat span { display: block; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+  .stat .num { margin-top: 6px; font-size: 18px; font-weight: 600; color: var(--ink); }
+
+  .compare { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .compare li {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    border: 1px solid var(--line); background: #fff; border-radius: 16px; padding: 14px 16px;
+  }
+  .compare li.sel { border: 2px solid var(--wine); padding: 13px 15px; }
+  .compare li.transfer { background: var(--mint); border-color: var(--mint-line); color: var(--forest); }
+  .compare b { display: block; font-size: 15px; }
+  .compare small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--muted); }
+  .compare li.transfer small { color: var(--forest); }
+  .compare .num { font-size: 18px; font-weight: 600; white-space: nowrap; }
+  .chip { display: inline-block; margin-left: 8px; vertical-align: middle; background: var(--sand); color: var(--wine-ink); border-radius: 999px; padding: 2px 8px; font-size: 11.5px; font-weight: 700; }
+  .compare-title { font-size: 13px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--wine); }
+
+  /* Descuento por transferencia */
+  .callout {
+    margin-top: 18px; display: flex; flex-direction: column; gap: 14px;
+    border: 1px solid var(--mint-line); background: var(--mint); color: var(--forest); border-radius: 20px; padding: 20px;
+  }
+  .callout .icon { width: 46px; height: 46px; border-radius: 14px; background: #fff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .callout p { flex: 1; font-size: 16px; line-height: 1.55; }
+  .callout p strong { font-size: 18px; }
+  .callout .amount { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-top: 1px solid var(--mint-line); padding-top: 14px; flex-shrink: 0; }
+  .callout .amount b { font-size: 13px; }
+  .callout .amount .num { font-size: 24px; font-weight: 600; }
+
+  /* Cómo se calcula */
+  section.how { margin-top: 40px; }
+  section.how h2 { font-size: 24px; line-height: 1.15; font-weight: 800; color: var(--wine); }
+  .steps { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 12px; }
+  .steps li { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; }
+  .steps .n { display: block; font-size: 13px; font-weight: 600; letter-spacing: .1em; color: var(--wine); }
+  .steps h3 { margin-top: 6px; font-size: 17px; font-weight: 700; color: var(--ink); }
+  .steps p { margin-top: 6px; font-size: 14px; line-height: 1.55; color: var(--muted); }
+  .formula { display: inline-block; margin-top: 12px; background: var(--sand); color: var(--wine-ink); border-radius: 10px; padding: 7px 11px; font-size: 13px; overflow-wrap: anywhere; }
+
+  footer { margin: 40px 0 32px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 12.5px; line-height: 1.6; color: var(--muted); }
+  footer p + p { margin-top: 6px; }
+
+  @media (min-width: 640px) {
+    .taxes-row { flex-direction: row; gap: 20px; }
+    .stat .num { font-size: 22px; }
+  }
+
+  @media (min-width: 1024px) {
+    header.top { padding: 32px 0 26px; }
+    .logo { font-size: 20px; }
+    .title { font-size: 34px; }
+    .lead { font-size: 17px; }
+    .wrap { padding: 0 32px; }
+    .card { border-radius: 24px; padding: 28px 32px 32px; }
+    .tabs { display: flex; width: fit-content; gap: 8px; border-radius: 999px; }
+    .tab, .tab:first-child { height: 46px; border-radius: 999px; padding: 0 24px; font-size: 15px; }
+    .tab .short { display: none; }
+    .tab .long { display: inline; }
+    .panel { margin-top: 28px; flex-direction: row; align-items: flex-start; gap: 32px; }
+    .inputs { gap: 22px; }
+    .results { width: 440px; flex-shrink: 0; position: sticky; top: 24px; gap: 14px; }
+    .row { flex-direction: row; gap: 20px; }
+    .label { font-size: 14px; }
+    .box { height: 56px; }
+    .box input { font-size: 20px; }
+    .plans { gap: 12px; }
+    .plan { border-radius: 16px; padding: 14px 18px; }
+    .plan[aria-pressed="true"] { padding: 13px 17px; }
+    .plan b { font-size: 15px; }
+    .plan span { font-size: 13px; }
+    .select select { height: 56px; font-size: 15px; }
+    .pills { gap: 10px; }
+    .pill { font-size: 14.5px; padding: 0 18px; }
+    .pill[aria-pressed="true"] { padding: 0 17px; }
+    details.taxes summary, .taxes-body { padding-left: 18px; padding-right: 18px; }
+    .result { border-radius: 22px; padding: 26px 28px; }
+    .eyebrow { font-size: 13px; }
+    .big { font-size: 50px; margin-top: 10px; }
+    .sub { font-size: 14.5px; margin-top: 10px; }
+    .lines { font-size: 14.5px; gap: 11px; }
+    .stat { padding: 18px 20px; }
+    .stat span { font-size: 13px; }
+    .stat .num { font-size: 26px; }
+    .callout { flex-direction: row; align-items: center; gap: 22px; padding: 24px 28px; border-radius: 22px; }
+    .callout .icon { width: 52px; height: 52px; border-radius: 16px; }
+    .callout p { font-size: 18px; }
+    .callout p strong { font-size: 20px; }
+    .callout .amount { display: block; text-align: right; border-top: 0; border-left: 1px solid var(--mint-line); padding: 0 0 0 22px; }
+    .callout .amount .num { display: block; margin-top: 4px; font-size: 30px; }
+    section.how { margin-top: 56px; }
+    section.how h2 { font-size: 30px; }
+    .steps { grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 24px; }
+    .steps li { border-radius: 20px; padding: 26px 28px; }
+    .steps h3 { font-size: 19px; }
+    .steps p { font-size: 15px; }
+  }
+
+  @media print {
+    .tabs, details.taxes summary svg { display: none; }
+    .results { position: static; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="logo">Dama Rosales Digital</span>
+      <span class="badge">Calculadora para Tiendanube 2026</span>
+    </div>
+    <h1 class="title">¿A cuánto publicar y cuánto te queda en mano?</h1>
+    <p class="lead">Poné tus números y calculá al toque las comisiones de Pago Nube y Mercado Pago, el costo de las cuotas y los impuestos.</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="tabs" role="tablist" aria-label="Modos de cálculo">
+        <button class="tab" role="tab" type="button" id="tab-publicar" data-mode="publicar" aria-controls="panel">
+          <span class="short">¿A cuánto tengo que publicar?</span><span class="long">¿A cuánto tengo que publicar?</span>
+        </button>
+        <button class="tab" role="tab" type="button" id="tab-inverso" data-mode="inverso" aria-controls="panel">
+          <span class="short">Cuánto quiero en mano</span><span class="long">Al revés: ¿cuánto quiero en mano?</span>
+        </button>
+        <button class="tab" role="tab" type="button" id="tab-comparador" data-mode="comparador" aria-controls="panel">
+          <span class="short">Comparador</span><span class="long">Comparador de medios de pago</span>
+        </button>
+      </div>
+
+      <div class="panel" id="panel" role="tabpanel">
+        <div class="inputs">
+          <!-- Montos según el modo -->
+          <div class="row" id="fields-publicar">
+            <div class="field">
+              <label class="label" for="cost">Costo del producto</label>
+              <div class="box"><span class="affix" aria-hidden="true">$</span><input id="cost" class="money" type="text" inputmode="numeric" autocomplete="off"></div>
+              <span class="hint">Lo que te sale el producto, sin el margen.</span>
+            </div>
+            <div class="field">
+              <label class="label" for="margin">Margen de ganancia sobre el costo</label>
+              <div class="box"><input id="margin" class="percent" data-max="1000" type="text" inputmode="decimal" autocomplete="off" aria-describedby="profit-hint"><span class="affix" aria-hidden="true">%</span></div>
+              <span class="hint" id="profit-hint">Ganancia buscada: <strong class="num" id="profit">—</strong></span>
+            </div>
+          </div>
+          <div class="field" id="fields-inverso" hidden>
+            <label class="label" for="desired-net">¿Cuánto querés que te quede en mano?</label>
+            <div class="box"><span class="affix" aria-hidden="true">$</span><input id="desired-net" class="money" type="text" inputmode="numeric" autocomplete="off" aria-describedby="net-hint"></div>
+            <span class="hint" id="net-hint">Lo que querés ver acreditado en tu cuenta, después de comisiones e impuestos.</span>
+          </div>
+          <div class="field" id="fields-comparador" hidden>
+            <label class="label" for="list-price">Precio publicado</label>
+            <div class="box"><span class="affix" aria-hidden="true">$</span><input id="list-price" class="money" type="text" inputmode="numeric" autocomplete="off" aria-describedby="price-hint"></div>
+            <span class="hint" id="price-hint">Mirá cuánto te queda con cada medio de cobro y plazo para este precio.</span>
+          </div>
+
+          <!-- Plan -->
+          <div class="field">
+            <span class="label">Tu plan de Tiendanube</span>
+            <div class="plans" role="group" aria-label="Tu plan de Tiendanube">
+              <button class="plan" type="button" data-plan="inicial"><b>Plan Inicial</b><span>Solo Pago Nube · sin costo por transacción</span></button>
+              <button class="plan" type="button" data-plan="esencial"><b>Plan Esencial</b><span>Pago Nube o Mercado Pago (+2% de CPT)</span></button>
+            </div>
+          </div>
+
+          <!-- Medio y plazo -->
+          <div class="row" id="gateway-row">
+            <div class="field">
+              <span class="label">Medio de cobro</span>
+              <div class="segmented" role="group" aria-label="Medio de cobro">
+                <button class="seg" type="button" data-gateway="pagonube">Pago Nube</button>
+                <button class="seg" type="button" data-gateway="mercadopago">Mercado Pago</button>
+              </div>
+              <span class="hint" id="mp-hint" hidden>Mercado Pago está disponible solo en el plan Esencial.</span>
+            </div>
+            <div class="field">
+              <label class="label" for="term">Plazo de acreditación</label>
+              <div class="select">
+                <select id="term"></select>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#801A24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cuotas -->
+          <div class="field">
+            <span class="label">Cuotas sin interés que ofrecés</span>
+            <div class="pills" id="installments" role="group" aria-label="Cuotas sin interés que ofrecés" aria-describedby="installments-hint"></div>
+            <span class="hint" id="installments-hint"></span>
+          </div>
+
+          <!-- Impuestos -->
+          <details class="taxes" id="taxes">
+            <summary>
+              <span class="label">Impuestos y percepciones</span>
+              <span style="display:inline-flex;align-items:center;gap:8px">
+                <span class="hint" id="tax-summary" style="white-space:nowrap"></span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#801A24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </summary>
+            <div class="taxes-body">
+              <div class="taxes-row">
+                <div class="field">
+                  <label class="label" for="iva">Condición frente al IVA</label>
+                  <div class="select sm">
+                    <select id="iva"></select>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#801A24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                  </div>
+                </div>
+                <div class="field">
+                  <label class="label" for="iibb">Percepción de IIBB / SIRTAC</label>
+                  <div class="box sm"><input id="iibb" class="percent" data-max="10" type="text" inputmode="decimal" autocomplete="off" aria-describedby="iibb-hint"><span class="affix" aria-hidden="true">%</span></div>
+                </div>
+              </div>
+              <p class="hint" id="iibb-hint" style="margin-top:12px">El IVA y la percepción se calculan sobre las comisiones, no sobre lo que vendés. La percepción depende de tu provincia (suele ir de 0% a 3,5%).</p>
+            </div>
+          </details>
+        </div>
+
+        <div class="results" id="results" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <section class="callout" id="callout" aria-label="Descuento por transferencia">
+      <span class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B5E20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.5.4.8.9.9 1.5l.1.7h5.2l.1-.7c.1-.6.4-1.1.9-1.5A6 6 0 0 0 12 3z"/></svg></span>
+      <p>Podés ofrecer hasta un <strong class="num" id="callout-pct"></strong> de descuento por transferencia y ganar lo mismo que cobrando con tarjeta: la transferencia cobra solo <span id="callout-rate"></span> + IVA, sin costo de cuotas.</p>
+      <div class="amount"><b>Precio por transferencia</b><span class="num" id="callout-price"></span></div>
+    </section>
+
+    <section class="how" aria-labelledby="how-title">
+      <h2 id="how-title">Cómo se calcula, sin misterio</h2>
+      <ol class="steps">
+        <li>
+          <span class="n num">01</span>
+          <h3>Sumamos las tasas</h3>
+          <p>La comisión del medio de pago según el plazo, el costo por transacción del plan y el costo financiero de las cuotas.</p>
+          <span class="formula num" id="step-1"></span>
+        </li>
+        <li>
+          <span class="n num">02</span>
+          <h3>Le aplicamos los impuestos</h3>
+          <p>El IVA y la percepción de IIBB se calculan sobre esas comisiones, nunca sobre el precio completo.</p>
+          <span class="formula num" id="step-2"></span>
+        </li>
+        <li>
+          <span class="n num">03</span>
+          <h3>Despejamos el precio</h3>
+          <p>No alcanza con sumarle el porcentaje al costo: hay que dividir, porque la comisión se cobra sobre el precio final.</p>
+          <span class="formula num" id="step-3"></span>
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <p>Las comisiones, plazos y costos de financiación son valores de referencia publicados por Tiendanube para 2026 y pueden cambiar. Verificá siempre las tasas vigentes en tu panel antes de fijar precios.</p>
+    <p>© 2026 Dama Rosales Digital · Calculadora de precios para Tiendanube.</p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+// ---------- Tasas de referencia Tiendanube 2026 (src/lib/constants.ts). Todas en %, sin IVA. ----------
+
+const PLANS = {
+  inicial: { label: "Plan Inicial", gateways: ["pagonube"] },
+  esencial: { label: "Plan Esencial", gateways: ["pagonube", "mercadopago"] },
+};
+
+const GATEWAYS = {
+  pagonube: { label: "Pago Nube", cpt: 0 },
+  // Costo por transacción de Tiendanube al usar una pasarela externa (solo plan Esencial).
+  mercadopago: { label: "Mercado Pago", cpt: 2 },
+};
+
+/** Plazos ordenados del más barato al más caro. El primero es el default. */
+const TERMS = {
+  inicial: {
+    pagonube: [
+      { id: "pn-14", label: "Cobrar en 14 días", short: "14 días", rate: 4.69 },
+      { id: "pn-7", label: "Cobrar en 7 días", short: "7 días", rate: 5.59 },
+      { id: "pn-1", label: "Cobrar al otro día", short: "Al otro día", rate: 7.69 },
+    ],
+  },
+  esencial: {
+    pagonube: [
+      { id: "pn-14", label: "Cobrar en 14 días", short: "14 días", rate: 3.49 },
+      { id: "pn-7", label: "Cobrar en 7 días", short: "7 días", rate: 4.39 },
+      { id: "pn-1", label: "Cobrar al otro día", short: "Al otro día", rate: 6.09 },
+    ],
+    mercadopago: [
+      { id: "mp-35", label: "Cobrar a 35 días", short: "35 días", rate: 1.49 },
+      { id: "mp-18", label: "Cobrar a 18 días", short: "18 días", rate: 3.39 },
+      { id: "mp-10", label: "Cobrar a 10 días", short: "10 días", rate: 4.39 },
+      { id: "mp-0", label: "Cobrar en el momento", short: "En el momento", rate: 6.29 },
+    ],
+  },
+};
+
+/** Costo financiero de las cuotas sin interés que absorbe el vendedor, en %, sin IVA. */
+const INSTALLMENTS = [
+  { count: 0, rate: 0 },
+  { count: 2, rate: 7.7 },
+  { count: 3, rate: 10.45 },
+  { count: 6, rate: 13.67 },
+  { count: 9, rate: 18.36 },
+  { count: 12, rate: 22 },
+];
+
+const IVA_CONDITIONS = {
+  general: { label: "Monotributo o Responsable Inscripto", rate: 21 },
+  noInscripto: { label: "No inscripto", rate: 10.5 },
+};
+
+/** Comisión por cobrar con transferencia, en %, sin IVA. No tiene cuotas. */
+const TRANSFER_RATE = 1.5;
+
+const LIMITS = { maxAmount: 999999999, maxMargin: 1000, maxIibb: 10 };
+
+// ---------- Formato (src/lib/formatters.ts) ----------
+
+const intFormat = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 });
+const formatARS = (v) => `$ ${intFormat.format(Math.round(v))}`;
+const formatAmount = (v) => intFormat.format(Math.round(v));
+const formatPct = (fraction, digits = 1) =>
+  `${(fraction * 100).toLocaleString("es-AR", { minimumFractionDigits: digits, maximumFractionDigits: digits })}%`;
+const formatRate = (percent) => `${percent.toLocaleString("es-AR", { maximumFractionDigits: 2 })}%`;
+const formatDecimal = (v, digits = 4) =>
+  v.toLocaleString("es-AR", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+
+function parseAmount(text) {
+  const digits = String(text).replace(/\D/g, "");
+  return digits ? Number(digits) : null;
+}
+
+function parsePercent(text) {
+  const normalized = String(text).replace(",", ".").replace(/[^\d.]/g, "");
+  if (!normalized || normalized === ".") return null;
+  const value = Number(normalized);
+  return Number.isFinite(value) ? value : null;
+}
+
+const clamp = (value, max) => Math.min(Math.max(value, 0), max);
+
+// ---------- Motor de cálculo (src/lib/engine.ts) ----------
+
+const termsFor = (plan, gateway) => TERMS[plan][gateway] || [];
+
+function findTerm(plan, gateway, termId) {
+  const terms = termsFor(plan, gateway);
+  return terms.find((t) => t.id === termId) || terms[0];
+}
+
+const installmentRate = (count) => (INSTALLMENTS.find((i) => i.count === count) || { rate: 0 }).rate;
+
+/** Si el medio o el plazo no existen en el plan, los lleva a una opción válida. */
+function normalizeParams(p) {
+  const gateway = PLANS[p.plan].gateways.includes(p.gateway) ? p.gateway : PLANS[p.plan].gateways[0];
+  return { ...p, gateway, termId: findTerm(p.plan, gateway, p.termId).id };
+}
+
+// T_total = (Tasa plazo + CPT + Tasa cuotas) × (1 + IVA + IIBB)
+function computeRates(params) {
+  const p = normalizeParams(params);
+  const gateway = findTerm(p.plan, p.gateway, p.termId).rate / 100;
+  const cpt = GATEWAYS[p.gateway].cpt / 100;
+  const installments = installmentRate(p.installments) / 100;
+  const commissions = gateway + cpt + installments;
+  const ivaRate = IVA_CONDITIONS[p.ivaCondition].rate / 100;
+  const iibbRate = Math.max(0, p.iibb) / 100;
+  return {
+    gateway, cpt, installments, commissions,
+    iva: commissions * ivaRate,
+    iibb: commissions * iibbRate,
+    fiscalFactor: 1 + ivaRate + iibbRate,
+    total: commissions * (1 + ivaRate + iibbRate),
+  };
+}
+
+/** P = N / (1 − T_total) */
+function priceFromNet(net, totalRate) {
+  if (!Number.isFinite(net) || net <= 0) {
+    return { ok: false, error: "Ingresá un monto mayor a cero para calcular el precio." };
+  }
+  if (totalRate >= 1) {
+    return { ok: false, error: "Las comisiones e impuestos suman 100% o más: no hay precio que las cubra. Revisá la percepción de IIBB." };
+  }
+  return { ok: true, price: net / (1 - totalRate) };
+}
+
+function breakdown(price, rates, installments) {
+  const deductions = price * rates.total;
+  return {
+    price,
+    gateway: price * rates.gateway,
+    cpt: price * rates.cpt,
+    installments: price * rates.installments,
+    iva: price * rates.iva,
+    iibb: price * rates.iibb,
+    deductions,
+    net: price - deductions,
+    perInstallment: installments > 0 ? price / installments : price,
+  };
+}
+
+/** Cuánto queda en mano con cada medio y plazo del plan, ordenado de mayor a menor. */
+function compareGateways(price, params) {
+  const p = normalizeParams(params);
+  return PLANS[p.plan].gateways
+    .flatMap((gateway) =>
+      termsFor(p.plan, gateway).map((term) => {
+        const rate = computeRates({ ...p, gateway, termId: term.id }).total;
+        return { gateway, term, rate, net: price * (1 - rate), selected: gateway === p.gateway && term.id === p.termId };
+      }),
+    )
+    .sort((a, b) => b.net - a.net);
+}
+
+// ---------- Estado (src/hooks/useCalculator.ts) ----------
+
+const STORAGE_KEY = "calculadora-precios-tiendanube";
+const DEFAULTS = {
+  mode: "publicar",
+  cost: 100000,
+  margin: "40",
+  desiredNet: 140000,
+  listPrice: null,
+  plan: "esencial",
+  gateway: "pagonube",
+  termId: "pn-14",
+  installments: 3,
+  ivaCondition: "general",
+  iibbText: "0",
+};
+
+// Se recuerdan los últimos datos en este navegador, para no cargarlos cada día.
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    if (saved && typeof saved === "object") {
+      const s = { ...DEFAULTS, ...saved };
+      if (!PLANS[s.plan]) s.plan = DEFAULTS.plan;
+      if (!IVA_CONDITIONS[s.ivaCondition]) s.ivaCondition = DEFAULTS.ivaCondition;
+      if (!INSTALLMENTS.some((i) => i.count === s.installments)) s.installments = DEFAULTS.installments;
+      if (!["publicar", "inverso", "comparador"].includes(s.mode)) s.mode = DEFAULTS.mode;
+      return { ...s, ...normalizeParams(s) };
+    }
+  } catch (e) { /* sin almacenamiento: arrancamos con los valores por defecto */ }
+  return { ...DEFAULTS };
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignorar */ }
+}
+
+const state = loadState();
+
+const params = () => ({
+  plan: state.plan,
+  gateway: state.gateway,
+  termId: state.termId,
+  installments: state.installments,
+  ivaCondition: state.ivaCondition,
+  iibb: clamp(parsePercent(state.iibbText) ?? 0, LIMITS.maxIibb),
+});
+
+function calculate() {
+  const p = params();
+  const rates = computeRates(p);
+  const marginValue = clamp(parsePercent(state.margin) ?? 0, LIMITS.maxMargin);
+  const costNet = state.cost == null ? null : state.cost * (1 + marginValue / 100);
+  // El comparador arranca con el precio del modo "publicar" hasta que se edite.
+  const fromCost = costNet == null ? null : priceFromNet(costNet, rates.total);
+
+  let targetNet;
+  let price = null;
+  let error = null;
+
+  if (state.mode === "comparador") {
+    price = state.listPrice ?? (fromCost && fromCost.ok ? Math.round(fromCost.price) : null);
+    targetNet = price == null ? null : price * (1 - rates.total);
+    if (price == null || price <= 0) error = "Ingresá el precio publicado para comparar.";
+  } else {
+    targetNet = state.mode === "publicar" ? costNet : state.desiredNet;
+    const priced = targetNet == null ? null : priceFromNet(targetNet, rates.total);
+    // Se publica en pesos enteros; el resto de los números sale de ese precio.
+    if (priced && priced.ok) price = Math.round(priced.price);
+    else error = (priced && priced.error) || "Completá los montos para ver el resultado.";
+  }
+
+  const ok = price != null && !error;
+  const b = ok ? breakdown(price, rates, p.installments) : null;
+  // La transferencia paga IVA sobre su comisión, pero no percepción de IIBB.
+  const transferRate = (TRANSFER_RATE / 100) * (1 + IVA_CONDITIONS[p.ivaCondition].rate / 100);
+  // Precio por transferencia que deja en mano lo mismo que cobrar con tarjeta.
+  const transferPrice = b ? Math.round(b.net / (1 - transferRate)) : null;
+  return {
+    params: p,
+    rates,
+    b,
+    transfer: b
+      ? { rate: transferRate, net: b.price * (1 - transferRate), price: transferPrice, discount: 1 - transferPrice / b.price }
+      : null,
+    comparison: ok ? compareGateways(price, p) : [],
+    error,
+    targetNet,
+    profit: state.mode === "publicar" && state.cost != null ? state.cost * (marginValue / 100) : null,
+  };
+}
+
+// ---------- Interfaz ----------
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+const moneyInputs = { cost: "cost", "desired-net": "desiredNet", "list-price": "listPrice" };
+
+/** Formatea con puntos de miles mientras se escribe, sin mover el cursor. */
+function bindMoney(input, key) {
+  input.addEventListener("input", () => {
+    const caret = input.selectionStart ?? input.value.length;
+    const caretDigits = input.value.slice(0, caret).replace(/\D/g, "").length;
+    const parsed = parseAmount(input.value);
+    state[key] = parsed == null ? null : Math.min(parsed, LIMITS.maxAmount);
+    const text = state[key] == null ? "" : formatAmount(state[key]);
+    input.value = text;
+    let digits = 0;
+    let pos = 0;
+    while (pos < text.length && digits < caretDigits) {
+      if (/\d/.test(text[pos])) digits++;
+      pos++;
+    }
+    input.setSelectionRange(pos, pos);
+    update();
+  });
+}
+
+/** Solo dígitos y un separador decimal; tope en data-max. */
+function bindPercent(input, key) {
+  const max = Number(input.dataset.max);
+  input.addEventListener("input", () => {
+    const cleaned = input.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
+    const numeric = Number(cleaned.replace(",", "."));
+    state[key] = Number.isFinite(numeric) && numeric > max ? String(max) : cleaned;
+    if (input.value !== state[key]) input.value = state[key];
+    update();
+  });
+}
+
+function fillInputs() {
+  for (const [id, key] of Object.entries(moneyInputs)) {
+    $(id).value = state[key] == null ? "" : formatAmount(state[key]);
+  }
+  $("margin").value = state.margin;
+  $("iibb").value = state.iibbText;
+  $("iva").value = state.ivaCondition;
+}
+
+function setMode(mode) {
+  // Al entrar al comparador, arrancamos con el precio que se venía mostrando.
+  if (mode === "comparador" && state.mode !== "comparador") {
+    const { b } = calculate();
+    if (b) {
+      state.listPrice = Math.round(b.price);
+      $("list-price").value = formatAmount(state.listPrice);
+    }
+  }
+  state.mode = mode;
+  update();
+}
+
+function line(label, value) {
+  return `<div class="line"><span>${esc(label)}</span><span class="num">− ${formatARS(value)}</span></div>`;
+}
+
+function errorCard(message) {
+  return `<div class="error" role="status"><span class="eyebrow">Falta un dato</span><p>${esc(message)}</p></div>`;
+}
+
+function renderResults(r) {
+  const { b, rates, params: p } = r;
+  if (state.mode === "comparador") {
+    if (!b) return errorCard(r.error || "Ingresá el precio publicado para comparar.");
+    const rows = r.comparison
+      .map(
+        (row) => `<li class="${row.selected ? "sel" : ""}">
+          <span><b>${esc(GATEWAYS[row.gateway].label)}${row.selected ? '<span class="chip">Tu elección</span>' : ""}</b>
+          <small>${esc(row.term.short)} · ${formatPct(row.rate)} de costo</small></span>
+          <span class="num">${formatARS(row.net)}</span></li>`,
+      )
+      .join("");
+    return `<span class="compare-title">Te queda en mano con cada medio</span>
+      <ul class="compare">
+        <li class="transfer"><span><b>Transferencia</b><small>${formatRate(TRANSFER_RATE)} + IVA · ${formatPct(r.transfer.rate)} de costo</small></span><span class="num">${formatARS(r.transfer.net)}</span></li>
+        ${rows}
+      </ul>
+      ${p.plan === "inicial" ? '<span class="hint">Mercado Pago no aparece porque solo está disponible en el plan Esencial.</span>' : ""}`;
+  }
+
+  if (!b) return errorCard(r.error || "Completá los datos para ver el resultado.");
+
+  const gatewayLabel = GATEWAYS[p.gateway].label;
+  const ivaRate = IVA_CONDITIONS[p.ivaCondition].rate;
+  const secondary =
+    state.mode === "publicar" && state.cost
+      ? { label: "Margen real sobre el costo", value: formatPct((b.net - state.cost) / state.cost) }
+      : { label: "Tenés que remarcar", value: `+ ${formatPct(b.price / b.net - 1)}` };
+
+  return `<div class="result">
+      <span class="eyebrow">Precio a publicar</span>
+      <span class="big num">${formatARS(b.price)}</span>
+      <span class="sub">${
+        p.installments > 0
+          ? `o ${p.installments} cuotas sin interés de <strong class="num">${formatARS(b.perInstallment)}</strong>`
+          : "en un solo pago"
+      }</span>
+      <div class="divider"></div>
+      <div class="lines">
+        ${line(`Comisión ${gatewayLabel} (${formatRate(rates.gateway * 100)})`, b.gateway)}
+        ${b.cpt > 0 ? line(`Costo por transacción (${formatRate(rates.cpt * 100)})`, b.cpt) : ""}
+        ${p.installments > 0 ? line(`${p.installments} cuotas sin interés (${formatRate(rates.installments * 100)})`, b.installments) : ""}
+        ${line(`IVA ${formatRate(ivaRate)} s/ comisiones`, b.iva)}
+        ${line(`Percepción IIBB (${formatRate(p.iibb)})`, b.iibb)}
+      </div>
+      <div class="total"><b>Total de deducciones</b><span class="num">${formatARS(b.deductions)} <small>(${formatPct(rates.total)})</small></span></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span>Te queda en mano</span><span class="num">${formatARS(b.net)}</span></div>
+      <div class="stat"><span>${esc(secondary.label)}</span><span class="num">${secondary.value}</span></div>
+    </div>`;
+}
+
+function update() {
+  Object.assign(state, normalizeParams(state));
+  const r = calculate();
+  const p = r.params;
+
+  // Pestañas
+  document.querySelectorAll(".tab").forEach((tab) => {
+    const active = tab.dataset.mode === state.mode;
+    tab.setAttribute("aria-selected", String(active));
+    tab.tabIndex = active ? 0 : -1;
+  });
+  $("panel").setAttribute("aria-labelledby", `tab-${state.mode}`);
+  $("fields-publicar").hidden = state.mode !== "publicar";
+  $("fields-inverso").hidden = state.mode !== "inverso";
+  $("fields-comparador").hidden = state.mode !== "comparador";
+  $("gateway-row").hidden = state.mode === "comparador";
+  $("profit").textContent = r.profit != null ? formatARS(r.profit) : "—";
+
+  // Plan y medio de cobro
+  document.querySelectorAll(".plan").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.plan === p.plan)));
+  const onlyPagoNube = p.plan === "inicial";
+  document.querySelectorAll(".seg").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b.dataset.gateway === p.gateway));
+    const disabled = b.dataset.gateway === "mercadopago" && onlyPagoNube;
+    b.disabled = disabled;
+    b.title = disabled ? "Disponible solo en el plan Esencial" : "";
+  });
+  $("mp-hint").hidden = !onlyPagoNube;
+
+  const cpt = GATEWAYS[p.gateway].cpt;
+  $("term").innerHTML = termsFor(p.plan, p.gateway)
+    .map((t) => `<option value="${t.id}">${esc(`${t.label} — ${formatRate(t.rate)} + IVA${cpt ? ` + ${formatRate(cpt)} CPT` : ""}`)}</option>`)
+    .join("");
+  $("term").value = p.termId;
+
+  // Cuotas
+  document.querySelectorAll(".pill").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.count) === p.installments)));
+  const current = INSTALLMENTS.find((i) => i.count === p.installments) || INSTALLMENTS[0];
+  $("installments-hint").textContent =
+    current.count === 0
+      ? "Sin cuotas no pagás costo financiero: solo la comisión del medio de cobro."
+      : `${current.count} cuotas sin interés tienen un costo financiero de ${formatRate(current.rate)} + IVA, que absorbés vos.`;
+
+  $("tax-summary").textContent = `IVA ${formatRate(IVA_CONDITIONS[p.ivaCondition].rate)} · IIBB ${formatRate(p.iibb)}`;
+
+  // Resultados
+  $("results").innerHTML = renderResults(r);
+
+  $("callout").hidden = !r.transfer || r.transfer.discount <= 0;
+  if (r.transfer) {
+    $("callout-pct").textContent = formatPct(r.transfer.discount);
+    $("callout-rate").textContent = formatRate(TRANSFER_RATE);
+    $("callout-price").textContent = formatARS(r.transfer.price);
+  }
+
+  const parts = [r.rates.gateway, r.rates.cpt, r.rates.installments].filter((x) => x > 0).map((x) => formatRate(x * 100));
+  $("step-1").textContent = `${parts.join(" + ")} = ${formatPct(r.rates.commissions, 2)}`;
+  $("step-2").textContent = `${formatPct(r.rates.commissions, 2)} × ${r.rates.fiscalFactor.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })} = ${formatPct(r.rates.total, 2)}`;
+  $("step-3").textContent = `${formatARS((r.b && r.b.net) ?? r.targetNet ?? 0)} ÷ (1 − ${formatDecimal(r.rates.total)})`;
+
+  saveState();
+}
+
+function init() {
+  $("installments").innerHTML = INSTALLMENTS.map(
+    ({ count }) => `<button class="pill" type="button" data-count="${count}">${count === 0 ? "Sin cuotas" : `${count} cuotas`}</button>`,
+  ).join("");
+  $("iva").innerHTML = Object.entries(IVA_CONDITIONS)
+    .map(([id, c]) => `<option value="${id}">${esc(`${c.label} — ${formatRate(c.rate)}`)}</option>`)
+    .join("");
+
+  for (const [id, key] of Object.entries(moneyInputs)) bindMoney($(id), key);
+  bindPercent($("margin"), "margin");
+  bindPercent($("iibb"), "iibbText");
+
+  const tabs = [...document.querySelectorAll(".tab")];
+  tabs.forEach((tab, i) => {
+    tab.addEventListener("click", () => setMode(tab.dataset.mode));
+    tab.addEventListener("keydown", (e) => {
+      const delta = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (!delta) return;
+      e.preventDefault();
+      const next = tabs[(i + delta + tabs.length) % tabs.length];
+      setMode(next.dataset.mode);
+      next.focus();
+    });
+  });
+
+  document.querySelectorAll(".plan").forEach((b) =>
+    b.addEventListener("click", () => { state.plan = b.dataset.plan; update(); }),
+  );
+  document.querySelectorAll(".seg").forEach((b) =>
+    b.addEventListener("click", () => { state.gateway = b.dataset.gateway; state.termId = ""; update(); }),
+  );
+  $("term").addEventListener("change", (e) => { state.termId = e.target.value; update(); });
+  $("installments").addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (pill) { state.installments = Number(pill.dataset.count); update(); }
+  });
+  $("iva").addEventListener("change", (e) => { state.ivaCondition = e.target.value; update(); });
+
+  // Impuestos abiertos por defecto en pantallas grandes, cerrados en el celular.
+  $("taxes").open = window.matchMedia("(min-width: 1024px)").matches;
+
+  fillInputs();
+  update();
+}
+
+init();
+</script>
+</body>
+</html>
